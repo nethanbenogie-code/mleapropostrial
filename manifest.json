@@ -2,7 +2,7 @@
   "name": "MLEA POS — BIR-Ready",
   "short_name": "MLEA POS",
   "description": "Multi-branch BIR-compliant Point of Sale system",
-  "start_url": "./mlea-pos-v6.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#080b14",
@@ -17,8 +17,8 @@
     }
   ],
   "shortcuts": [
-    { "name": "New Sale", "url": "./mlea-pos-v6.html#pos", "description": "Open POS terminal" },
-    { "name": "X-Reading", "url": "./mlea-pos-v6.html#xReading", "description": "Print X-Reading" }
+    { "name": "New Sale", "url": "./index.html#pos", "description": "Open POS terminal" },
+    { "name": "X-Reading", "url": "./index.html#xReading", "description": "Print X-Reading" }
   ],
   "prefer_related_applications": false
 }
