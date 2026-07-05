@@ -1,5 +1,5 @@
 // MLEA POS Service Worker v6.0 (modular build)
-const CACHE = 'mlea-pos-v6-trial';
+const CACHE = 'mlea-pos-v6-trial-b1';
 const ASSETS = [
   './','./index.html','./css/styles.css','./manifest.json',
   './js/01-core.js','./js/02-storage.js','./js/03-security.js','./js/04-license.js',
@@ -7,6 +7,7 @@ const ASSETS = [
   './js/09-inventory.js','./js/10-users.js','./js/11-sales-returns.js','./js/12-bir-readings.js',
   './js/13-reports-misc.js','./js/14-dev-console.js','./js/15-pwa-auth-or.js','./js/16-bir-books.js',
   './js/17-storage-idb.js','./js/18-features.js','./js/19-patches.js','./js/20-trial.js',
+  './js/21-batches.js',
   'https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap',
 ];
 self.addEventListener('install', e => {
