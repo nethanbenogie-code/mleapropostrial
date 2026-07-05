@@ -11,7 +11,18 @@
 function initApp(){
   if(!LocalDB.getAll('branches').length)LocalDB.add('branches',{name:'Main Branch',address:'Head Office',phone:'555-0000'});
   if(!LocalDB.getAll('users').length)LocalDB.add('users',{name:'Admin',role:'admin',active:true,pin:'1234',branchId:null});
-  if(!LocalDB.getAll('products').length)LocalDB.add('products',{sku:'SKU001',name:'Sample Product',price:99.99,cost:50,stock:50,category:'General',unit:'pcs',active:true,barcode:'123456789',branchId:null,supplierId:null,vatExempt:false,zeroRated:false});
+  if(!LocalDB.getAll('products').length)[
+    {sku:'SKU001',name:'Bottled Water 500ml',   price:15,  cost:9,  stock:120,category:'Beverages',    barcode:'4800001000017',vatExempt:false},
+    {sku:'SKU002',name:'Instant Coffee 3-in-1', price:12,  cost:7,  stock:200,category:'Beverages',    barcode:'4800001000024',vatExempt:false},
+    {sku:'SKU003',name:'White Bread Loaf',       price:55,  cost:36, stock:40, category:'Bakery',       barcode:'4800001000031',vatExempt:false},
+    {sku:'SKU004',name:'Canned Sardines 155g',   price:28,  cost:19, stock:90, category:'Canned Goods', barcode:'4800001000048',vatExempt:false},
+    {sku:'SKU005',name:'Shampoo Sachet',         price:8,   cost:4,  stock:250,category:'Personal Care',barcode:'4800001000055',vatExempt:false},
+    {sku:'SKU006',name:'Bath Soap 90g',          price:35,  cost:22, stock:80, category:'Personal Care',barcode:'4800001000062',vatExempt:false},
+    {sku:'SKU007',name:'Paracetamol 500mg (10s)',price:45,  cost:28, stock:60, category:'Medicine',     barcode:'4800001000079',vatExempt:true },
+    {sku:'SKU008',name:'Vitamin C 500mg (10s)',  price:60,  cost:38, stock:55, category:'Medicine',     barcode:'4800001000086',vatExempt:true },
+    {sku:'SKU009',name:'Ballpen Black',          price:10,  cost:5,  stock:150,category:'Stationery',   barcode:'4800001000093',vatExempt:false},
+    {sku:'SKU010',name:'Face Towel',             price:40,  cost:24, stock:35, category:'Household',     barcode:'4800001000109',vatExempt:false}
+  ].forEach(p=>LocalDB.add('products',{...p,unit:'pcs',active:true,branchId:null,supplierId:null,zeroRated:false}));
   if(!LocalDB.getAll('suppliers').length)LocalDB.add('suppliers',{name:'Sample Supplier',contact:'John Doe',phone:'555-0001',email:'supplier@email.com',address:'123 Supplier St'});
   LocalDB.getAll('settings').forEach(s=>{
     if(s.key==='currency')cur=s.value;
