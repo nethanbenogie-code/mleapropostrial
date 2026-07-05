@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isAuth() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isManagerOrAdmin() {
+      return isAuth() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin','manager']
+      );
+    }
+    function isSameBranch(branchId) {
+      return isAuth() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.branchId == branchId
+        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // ── Users ─────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isAuth();
+      allow create, update: if isManagerOrAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Branches ─────────────────────────────────────────
+    match /branches/{branchId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Products ─────────────────────────────────────────
+    match /products/{productId} {
+      allow read: if isAuth();
+      allow create, update: if isManagerOrAdmin();
+      allow delete: if isManagerOrAdmin();
+    }
+
+    // ── Sales — create allowed for cashiers, update/delete only for managers+ ──
+    match /sales/{saleId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update: if isManagerOrAdmin(); // for void flag
+      allow delete: if false; // never delete sales — BIR requirement
+    }
+
+    // ── Voided sales — append-only audit trail ────────────
+    match /voidedSales/{docId} {
+      allow read: if isManagerOrAdmin();
+      allow create: if isAuth();
+      allow update, delete: if false; // immutable
+    }
+
+    // ── Activity logs — append-only ───────────────────────
+    match /activityLogs/{logId} {
+      allow read: if isManagerOrAdmin();
+      allow create: if isAuth();
+      allow update, delete: if false; // immutable audit trail
+    }
+
+    // ── Returns ──────────────────────────────────────────
+    match /returns/{returnId} {
+      allow read: if isAuth();
+      allow create: if isManagerOrAdmin();
+      allow update, delete: if false; // immutable
+    }
+
+    // ── Settings ─────────────────────────────────────────
+    match /settings/{settingId} {
+      allow read: if isAuth();
+      allow write: if isManagerOrAdmin();
+    }
+
+    // ── Suppliers ────────────────────────────────────────
+    match /suppliers/{supplierId} {
+      allow read: if isAuth();
+      allow write: if isManagerOrAdmin();
+    }
+
+    // ── Purchase Orders ───────────────────────────────────
+    match /purchaseOrders/{poId} {
+      allow read: if isAuth();
+      allow create: if isManagerOrAdmin();
+      allow update: if isManagerOrAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Held Sales — per-device, any authenticated user ───
+    match /heldSales/{heldId} {
+      allow read, write: if isAuth();
+    }
+
+    // ── OR Counter — admin-managed sequence ───────────────
+    match /orCounter/sequence {
+      allow read: if isAuth();
+      allow write: if false; // only Cloud Functions write this
+    }
+
+    // ── Deny everything else ─────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

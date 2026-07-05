@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MLEA POS v6 — BIR-Ready + Firebase + PWA</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#d4a853">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<!-- Phase 3: IndexedDB storage indicator -->
+<meta name="storage" content="indexeddb,localstorage">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="amb"></div>
+<iframe id="printFrame" style="display:none;border:none;width:0;height:0" title="Print"></iframe>
+<div id="toastWrap" class="toast-wrap"></div>
+<div class="wrap">
+  <!-- LICENSE GATE -->
+  <div id="licenseGate">
+    <div class="lic-card">
+      <div class="lic-logo">🔐</div>
+      <h2>MLEA POS</h2>
+      <p>Enter your license key to unlock the system</p>
+      <input class="lic-input" type="text" id="licenseInput" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="24" oninput="fmtLic(this)">
+      <p style="font-size:.7em;color:var(--text3);margin:-4px 0 10px">Demo key: <span style="font-family:var(--fm);color:var(--gold);cursor:pointer" onclick="document.getElementById('licenseInput').value='MLEA-DEMO-UNLOCK-KEY1'">MLEA-DEMO-UNLOCK-KEY1</span></p>
+      <button class="btn bp" id="activateBtn" onclick="doActivate()" style="width:100%">Activate License</button>
+      <button class="btn bd" id="deactivateBtn" style="display:none;width:100%;margin-top:8px" onclick="doDeactivate()">Deactivate License</button>
+      <button class="btn bb" id="validateBtn" style="display:none;width:100%;margin-top:8px" onclick="doValidate()">🔍 Check Status</button>
+      <div class="lic-status" id="licStatus"></div>
+    </div>
+  </div>
+  <!-- LOGIN -->
+  <div id="loginScreen" style="display:none">
+    <div class="log-card">
+      <div class="log-logo">
+        <div class="log-icon">🏪</div>
+        <h1>MLEA POS</h1>
+        <p>BIR-Ready · Firebase-Ready · v6.0</p>
+      </div>
+      <div class="sec-label">Select User</div>
+      <div class="usr-grid" id="usrGrid"></div>
+      <div class="lockout-bar" id="lockoutBar"></div>
+      <div class="sec-label" style="margin-top:4px">Enter PIN</div>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="err-msg" id="errMsg"></div>
+      <div class="pin-grid">
+        <button class="pbn" onclick="ePin('1')">1</button><button class="pbn" onclick="ePin('2')">2</button><button class="pbn" onclick="ePin('3')">3</button>
+        <button class="pbn" onclick="ePin('4')">4</button><button class="pbn" onclick="ePin('5')">5</button><button class="pbn" onclick="ePin('6')">6</button>
+        <button class="pbn" onclick="ePin('7')">7</button><button class="pbn" onclick="ePin('8')">8</button><button class="pbn" onclick="ePin('9')">9</button>
+        <button class="pbn clr" onclick="clrPin()">Clear</button><button class="pbn" onclick="ePin('0')">0</button><button class="pbn sub" onclick="subPin()">→</button>
+      </div>
+    </div>
+  </div>
+  <!-- MAIN APP -->
+  <div id="mainApp">
+    <div class="sb-ov" id="sbOv" onclick="closeSB()"></div>
+    <div class="sidebar" id="sidebar">
+      <div class="sb-hdr">
+        <div class="sb-logo">🏪</div>
+        <div class="sb-hdr-txt"><h3>MLEA POS</h3><p id="sbSub">v6.0 BIR+Firebase</p></div>
+      </div>
+      <div class="sb-nav" id="sbNav"></div>
+      <div class="sb-ft"><button class="sb-ft-btn" onclick="logout()">🚪 Sign Out</button></div>
+    </div>
+    <div class="hdr">
+      <button class="hambg" onclick="openSB()">☰</button>
+      <span class="hdr-logo" id="hdrTitle">MLEA POS</span>
+      <div class="hdr-r">
+        <span id="hdrBranch"></span>
+        <button class="hbtn" onclick="logout()">Sign Out</button>
+      </div>
+    </div>
+    <div id="mainContent"></div>
+  </div>
+  <div class="sync-bar" id="syncBar">
+    <span style="display:flex;align-items:center"><span class="sdot local" id="syncDot"></span><span id="syncLabel">Local Storage</span></span>
+    <span id="syncMsg" style="color:var(--text3)">Ready</span>
+  </div>
+</div>
+<!-- MODAL -->
+<div class="modal" id="modal"><div class="modal-box" id="modalBox"></div></div>
+
+<!-- ===== MODULE SCRIPTS — load order is mandatory; 19-patches.js MUST be last ===== -->
+  <script src="js/01-core.js"></script>
+  <script src="js/02-storage.js"></script>
+  <script src="js/03-security.js"></script>
+  <script src="js/04-license.js"></script>
+  <script src="js/05-init-login.js"></script>
+  <script src="js/06-dashboard.js"></script>
+  <script src="js/07-pos.js"></script>
+  <script src="js/08-receipts.js"></script>
+  <script src="js/09-inventory.js"></script>
+  <script src="js/10-users.js"></script>
+  <script src="js/11-sales-returns.js"></script>
+  <script src="js/12-bir-readings.js"></script>
+  <script src="js/13-reports-misc.js"></script>
+  <script src="js/14-dev-console.js"></script>
+  <script src="js/15-pwa-auth-or.js"></script>
+  <script src="js/16-bir-books.js"></script>
+  <script src="js/17-storage-idb.js"></script>
+  <script src="js/18-features.js"></script>
+  <script src="js/19-patches.js"></script>
+  <!-- TRIAL PROTECTION — must load AFTER 19-patches so it can wrap the final functions -->
+  <script src="js/20-trial.js"></script>
+</body>
+</html>
