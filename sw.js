@@ -1,6 +1,6 @@
 // MLEA POS Service Worker v6.0 (modular build)
 // Hardened for GitHub Pages sub-path hosting + PWA navigation.
-const CACHE = 'mlea-pos-v6-trial-b2';
+const CACHE = 'mlea-pos-v6-trial-b3';
 
 // Resolve the scope the SW is registered under (e.g. /repo-name/ on
 // GitHub Pages) so all cached paths are correct regardless of sub-path.
@@ -22,6 +22,8 @@ const FONTS = 'https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;70
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(c =>
+      // addAll fails the whole install if ONE asset 404s; add resiliently
+      // so a single missing file can't brick the worker.
       Promise.all([...ASSETS, FONTS].map(u =>
         c.add(u).catch(() => console.warn('[SW] skip cache:', u))
       ))
@@ -41,12 +43,16 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
 
+  // Firebase / Google Apps Script: network-first, cache as fallback.
   if (url.hostname.includes('firebase') ||
       (url.hostname.includes('googleapis.com') && url.pathname.includes('script'))) {
     e.respondWith(fetch(req).catch(() => caches.match(req)));
     return;
   }
 
+  // Navigations (opening the app / any route): serve the app shell.
+  // This is the key fix — a route that isn't a real file (or a stale
+  // start_url) resolves to index.html instead of a 404.
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req)
@@ -56,6 +62,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
+  // Everything else: cache-first, then network (and cache the result).
   e.respondWith(
     caches.match(req).then(cached => cached || fetch(req).then(res => {
       if (res && res.ok && res.type === 'basic') {
